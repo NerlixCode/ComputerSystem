@@ -67,7 +67,7 @@ namespace Lab1
             string content;
 
             using (StreamReader sr = new StreamReader(c_pathToFiles + fileName, Encoding.UTF8))
-                content = sr.ReadToEnd().ToLower().Replace("\r\n", "\n");
+                content = sr.ReadToEnd().Replace("\r\n", "\n");
 
             return content;
         }
