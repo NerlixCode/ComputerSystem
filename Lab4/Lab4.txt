@@ -1,10 +1,11 @@
 .include "defs.h"
 
 .section .bss
+n: .quad 0
 pid: .quad 0
 
 .section .data
-nforks: .byte 5
+nforks: .quad 5
 
 .section .text
 .global _start
@@ -13,36 +14,38 @@ newline: .byte '\n'
 
 _start:
 fork:
-        #movq $SYS_FORK, %rax
-        #syscall
+        movq $SYS_FORK, %rax
+        syscall
+
+        movq %rax, pid
 
         cmp $0, pid
-        je child
         jne parent
 
 child:
+        movq nforks, %rcx
+        addq $0x30, %rcx
+        movq %rcx, n
+
         movq $SYS_WRITE, %rax
         movq $STDOUT, %rdi
-
-        movq nforks, %rsi
-        addq $0x30, %rsi
-
+        movq $n, %rsi
         movq $1, %rdx
         syscall
 
-        decq nforks
+        decb nforks
 
         cmp $0, nforks
         je end
-        jmp fork
+        jne fork
 
 parent:
-        movq $SYS_WAIT4, %rdi
+        movq $SYS_WAIT4, %rax
+        movq pid, %rdi
         movq $0, %rsi
         movq $0, %rdx
         movq $0, %r10
         syscall
-        jmp fork
 
 end:
         movq $SYS_WRITE, %rax
